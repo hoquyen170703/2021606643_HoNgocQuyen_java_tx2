@@ -4,12 +4,10 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TV extends Product implements Serializable, TVManager {
+public class TV extends Product implements TVManager {
 
-    @Serial
-    private static final long serialVersionUID = 1234L;
-    private static Scanner sc = new Scanner(System.in);
-    private static List<TV> tvList = new ArrayList<>();
+    static Scanner sc = new Scanner(System.in);
+    public static List<TV> tvList = new ArrayList<>();
 
     public static final String SCREEN_SIZE = "20 inches";
     public static final String RESOLUTION = "Full HD";
@@ -19,7 +17,7 @@ public class TV extends Product implements Serializable, TVManager {
     private String resolution;
     private boolean smartTV;
 
-    // Constructor without parameters
+    // Constructor không tham số
     public TV() {
         super();
         this.screenSize = TV.SCREEN_SIZE;
@@ -27,7 +25,7 @@ public class TV extends Product implements Serializable, TVManager {
         this.smartTV = TV.SMART_TV;
     }
 
-    // Constructor with all parameters
+    // Constructor đầy đủ tham số
     public TV(String productId, String productName, double productPrice, int productTotal, String screenSize, String resolution, boolean smartTV) {
         super(productId, productName, productPrice, productTotal);
         this.screenSize = screenSize;
@@ -74,29 +72,23 @@ public class TV extends Product implements Serializable, TVManager {
         resolution = sc.nextLine();
         System.out.println("Input smartTV: ");
         smartTV = sc.nextBoolean();
-
-        sc.nextLine();
-
     }
 
     @Override
     public boolean addTV(TV t) {
-
-        // Input information from the user
+        // Nhập thông tin từ người dùng
         t.input();
 
-        // Check if the product ID already exists in the list
+        // Kiểm tra xem id của sản phẩm đã tồn tại trong danh sách hay chưa
         for (TV tv : tvList) {
             if (tv.getProduct_id().equalsIgnoreCase(t.getProduct_id())) {
-                // Display error message and return false if the ID already exists
+                // Hiển thị thông báo lỗi và trả về false nếu id đã tồn tại
                 System.out.println("Error: Product ID already exists in the list.");
                 return false;
             }
         }
-        // If the ID does not exist, add the product to the list and return true
-        tvList.add(t);
-        return true;
-
+        // Nếu id chưa tồn tại, thêm sản phẩm vào danh sách và trả về true
+        return tvList.add(t);
     }
 
     @Override
@@ -144,12 +136,14 @@ public class TV extends Product implements Serializable, TVManager {
                     .filter(tv -> tv.getProduct_price() <= price) // Lọc các TV có giá nhỏ hơn hoặc bằng price
                     .sorted(Comparator.comparingDouble(TV::getProduct_price).reversed()) // Sắp xếp theo giá giảm dần
                     .collect(Collectors.toList());
+
+
         }
 
         return sortedList;
+
     }
 
-    // Method to save tvList to a file
     public static void saveToFile() {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("TV.bin"))) {
             oos.writeObject(tvList);
@@ -172,8 +166,9 @@ public class TV extends Product implements Serializable, TVManager {
 
 
     public static void main(String[] args) {
+        loadFromFile();
+
         try {
-            loadFromFile();
             System.out.println("1. Add TV");
             System.out.println("2. Edit TV");
             System.out.println("3. Delete TV");
@@ -183,22 +178,23 @@ public class TV extends Product implements Serializable, TVManager {
             System.out.println("7. Exit");
             while (true) {
                 System.out.print("Enter your option:");
-                String option = sc.next();
+                int option = sc.nextInt();
                 switch (option) {
-                    case "1": {
+                    case 1: {
                         // Add a new TV
                         TV tv = new TV();
-                        if (tv.addTV(tv)) {
+                        if (new TV().addTV(tv)) {
                             System.out.println("Added TV");
-                            saveToFile(); // Save changes to file
-
+                            saveToFile();
                         }
                         break;
                     }
-                    case "2": {
+                    case 2: {
                         // edit a tv in tvList by entering ID
+                        sc.nextLine();
                         System.out.println("Enter the product ID you want to edit: ");
                         String idToEdit = sc.nextLine();
+
                         for (int i = 0; i < tvList.size(); i++) {
                             TV tv = tvList.get(i);
                             if (tv.getProduct_id().equalsIgnoreCase(idToEdit)) {
@@ -206,18 +202,16 @@ public class TV extends Product implements Serializable, TVManager {
                                 System.out.println("Current product information:");
                                 System.out.println(String.format("%-10s | %-20s | %-10s | %-10s | %-10s | %-10s | %-5s", "Product ID", "Product Name", "Price", "Total", "Screen Size", "Resolution", "is SmartTV ?"));
                                 System.out.println(tv);
-                                tv.editTV(tv);
-                                saveToFile(); // Save changes to file
-                                break;
-                            } else {
-                                System.out.println("Error: Product ID does not exist in the list.");
+                                new TV().editTV(tv);
+                                saveToFile();
                                 break;
                             }
                         }
+                        break;
                     }
-                    case "3": {
+                    case 3: {
+                        //Delete a tv by entering ID
                         sc.nextLine();
-                        //Delete a tv by entering ID3
                         System.out.println("Enter the product ID you want to delete: ");
                         String idToDel = sc.nextLine();
                         for (int i = 0; i < tvList.size(); i++) {
@@ -227,21 +221,20 @@ public class TV extends Product implements Serializable, TVManager {
                                 System.out.println("Current product information:");
                                 System.out.println(String.format("%-10s | %-20s | %-10s | %-10s | %-10s | %-10s | %-5s", "Product ID", "Product Name", "Price", "Total", "Screen Size", "Resolution", "is SmartTV ?"));
                                 System.out.println(tv);
-                                System.out.println("Do you want to delete this product?(true/false)");
+                                System.out.println("Do you want to delete this product?(true/fasle)");
                                 String choice = sc.nextLine();
                                 if (choice.equalsIgnoreCase("true")) {
-                                    tv.delTV(tv);
+                                    new TV().delTV(tv);
                                     System.out.println("Deleted Successfully");
-                                    saveToFile(); // Save changes to file
+                                    saveToFile();
                                     break;
                                 }
-                            } else {
-                                System.out.println("Error: Product ID does not exist in the list.");
-                                break;
                             }
                         }
+                        break;
+
                     }
-                    case "4": {
+                    case 4: {
                         // Search product by name
                         sc.nextLine();
                         System.out.println("Enter the product name you want to search:");
@@ -257,7 +250,7 @@ public class TV extends Product implements Serializable, TVManager {
                             break;
                         }
                     }
-                    case "5": {
+                    case 5: {
                         // sort products whose price is less than or equal to the price entered
                         System.out.println("Enter the price you want to sort:");
                         double price = sc.nextDouble();
@@ -269,9 +262,14 @@ public class TV extends Product implements Serializable, TVManager {
                             System.out.println("The price is invalid");
                             break;
                         } else {
-
                             switch (choice) {
-                                case 1, 2: {
+                                case 1: {
+                                    System.out.println(String.format("%-10s | %-20s | %-10s | %-10s | %-10s | %-10s | %-5s", "Product ID", "Product Name", "Price", "Total", "Screen Size", "Resolution", "is SmartTV ?"));
+                                    result.forEach(System.out::println);
+                                    break;
+                                }
+                                case 2: {
+
                                     System.out.println(String.format("%-10s | %-20s | %-10s | %-10s | %-10s | %-10s | %-5s", "Product ID", "Product Name", "Price", "Total", "Screen Size", "Resolution", "is SmartTV ?"));
                                     result.forEach(System.out::println);
                                     break;
@@ -280,7 +278,7 @@ public class TV extends Product implements Serializable, TVManager {
                             break;
                         }
                     }
-                    case "6": {
+                    case 6: {
                         // Display the tvList
                         if (tvList.isEmpty()) {
                             System.out.println("No product in the list");
@@ -291,22 +289,16 @@ public class TV extends Product implements Serializable, TVManager {
                             break;
                         }
                     }
-                    case "7": {
+                    case 7: {
                         System.out.println("Thanks for using this application");
-                        saveToFile(); // Save changes to file before exiting
                         return;
                     }
                     default:
                         System.out.println("The option is invalid");
                 }
-
-
             }
-
         } catch (Exception ex) {
             ex.printStackTrace();
-        } finally {
-            sc.close();
         }
     }
 }

@@ -52,13 +52,11 @@ class AddEditDialog extends JDialog {
                     if (isEdit) {
                         ((TvUI) parent).updateProduct(rowIndex, getProductData());
                         updateFile(rowIndex);
-
                     } else {
                         if (validateForm()) ((TvUI) parent).addProduct(getProductData());
                         saveFile();
                     }
-                     // Lưu dữ liệu vào tệp tin
-                    dispose(); // Đóng cửa sổ sau khi lưu
+                    dispose();
 
             }
         });
